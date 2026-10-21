@@ -1,40 +1,67 @@
-# Maps Example
+# Embarque Acessível
 
-<p>
-  <!-- iOS -->
-  <a href="https://itunes.apple.com/app/apple-store/id982107779">
-    <img alt="Supports Expo iOS" longdesc="Supports Expo iOS" src="https://img.shields.io/badge/iOS-4630EB.svg?style=flat-square&logo=APPLE&labelColor=999999&logoColor=fff" />
-  </a>
-  <!-- Android -->
-  <a href="https://play.google.com/store/apps/details?id=host.exp.exponent&referrer=blankexample">
-    <img alt="Supports Expo Android" longdesc="Supports Expo Android" src="https://img.shields.io/badge/Android-4630EB.svg?style=flat-square&logo=ANDROID&labelColor=A4C639&logoColor=fff" />
-  </a>
-</p>
+MVP em Expo/React Native para apoiar pessoas com deficiência visual no embarque do transporte coletivo. Há dois perfis: passageiro solicita atendimento em um ponto e motorista compartilha sua posição, confirma o pedido e acompanha os passageiros atendidos.
 
-## Launch your own
+As linhas, sentidos e pontos presentes nesta versão são dados fictícios para demonstração. O aplicativo não fornece horários, trajetos oficiais nem integração com empresas de transporte.
 
-[![Launch with Expo](https://github.com/expo/examples/blob/master/.gh-assets/launch.svg?raw=true)](https://launch.expo.dev/?github=https://github.com/expo/examples/tree/master/with-maps)
+## Executar
 
-## 🚀 How to use
+```bash
+npm install
+npm start
+```
 
-- Install packages with `yarn` or `npm install`.
-- Run `yarn start` or `npm run start` to start the bundler.
-- Open the project in a React runtime to try it:
-  - iOS: [Client iOS](https://itunes.apple.com/app/apple-store/id982107779)
-  - Android: [Client Android](https://play.google.com/store/apps/details?id=host.exp.exponent&referrer=blankexample)
+Use `npm run android` para abrir no Android. A primeira validação foi preparada para Android e TalkBack, mantendo estrutura compatível com iOS.
 
-## Running/Modifying Native Code
+Sem configuração externa, o aplicativo inicia em **modo demonstração local**. Ele permite explorar os dois perfis e o simulador no mesmo aplicativo; para sincronizar dois celulares, configure o Firebase.
 
-You can generate native iOS and Android projects from your Expo config file (**app.json**/ **app.config.js**) by runnning `npx expo prebuild`. These native projects can then be compiled and run via XCode and Android Studio.
+## Configurar Firebase gratuito
 
-> 💡 Learn more about [native code in Expo](https://docs.expo.dev/workflow/customizing/)
+1. Crie um projeto no [Firebase Console](https://console.firebase.google.com/) no plano Spark.
+2. Em **Authentication**, habilite o provedor **E-mail/senha**.
+3. Crie uma **Realtime Database**. Para a demonstração, escolha uma região próxima e publique o conteúdo de `database.rules.json` nas regras da base.
+4. Registre um aplicativo Web no projeto e copie a configuração pública para um arquivo `.env`, criado a partir de `.env.example`.
+5. Crie a conta de motorista em Authentication. Depois de obter o UID, crie manualmente `profiles/<UID>` no Realtime Database com este formato:
 
-## Publishing
+```json
+{
+  "uid": "UID_DA_CONTA",
+  "displayName": "Motorista de demonstração",
+  "email": "motorista@exemplo.com",
+  "role": "driver",
+  "createdAt": 0
+}
+```
 
-- Configure your app to be able to use react-native-maps in production using this guide : [MapView configuration](https://docs.expo.dev/versions/v38.0.0/sdk/map-view/#configuration)
-- Deploy the native app to the App store and Play store using this guide: [Deployment](https://docs.expo.dev/distribution/app-stores/).
+O cadastro público do aplicativo cria apenas perfis `passenger`; a regra da base impede que alguém altere seu próprio perfil para motorista. A configuração usa somente chaves públicas do Firebase. Nunca adicione uma chave administrativa ao `.env` ou ao aplicativo.
 
-## 📝 Notes
+## Roteiro de demonstração em dois Androids
 
-- Learn more about [MapView](https://docs.expo.dev/versions/v38.0.0/sdk/map-view).
-- Learn more about [react-native-maps](https://github.com/react-native-community/react-native-maps).
+1. No primeiro celular, crie ou acesse uma conta de passageiro e envie um pedido escolhendo linha, sentido e ponto.
+2. No segundo, acesse a conta de motorista pré-criada, inicie a mesma linha e sentido e toque em **Iniciar simulador de rota** ou **Compartilhar localização por GPS**.
+3. Confirme o pedido do passageiro. O primeiro motorista a confirmar fica vinculado ao pedido.
+4. No celular do passageiro, acompanhe a situação. Os alertas ocorrem uma única vez ao entrar nas faixas de 500 m e 100 m, desde que a posição tenha no máximo 30 segundos e precisão de até 50 m.
+5. Confirme **Já embarquei**. Para testar desconexão, pause o compartilhamento ou minimize o aplicativo do motorista: o compartilhamento em primeiro plano é interrompido e precisa ser retomado ao voltar.
+
+Mantenha os dois aplicativos abertos durante a demonstração. Esta versão não solicita localização em segundo plano nem usa notificações com a tela bloqueada.
+
+## Acessibilidade
+
+- Navegação principal por listas, botões com pelo menos 52 px de altura e textos em português claro.
+- Rótulos, estados e dicas para TalkBack; mudanças relevantes usam anúncios de acessibilidade.
+- Sem leitor de tela, os avisos usam fala em português e vibração. O passageiro pode desligar a voz automática e repetir o estado atual.
+- A seleção do ponto sempre requer confirmação, mesmo quando o GPS ordena os pontos por proximidade.
+
+## Verificação
+
+```bash
+npm run lint
+npm run typecheck
+npx expo-doctor
+```
+
+`expo-doctor` pode exigir acesso à internet para baixar seu pacote quando ele ainda não estiver disponível localmente.
+
+## Limpeza da demonstração
+
+No Firebase Console, remova os registros de `requests`, `openRequests`, `passengerActiveRequests`, `driverRequests` e `trips` após cada demonstração. Mantenha somente `profiles` das contas necessárias. O MVP não grava histórico de trajetos.

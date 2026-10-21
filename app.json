@@ -1,4 +1,22 @@
 {
-  "name": "tcc",
-  "slug": "tcc"
+  "expo": {
+    "name": "Embarque Acessível",
+    "slug": "embarque-acessivel",
+    "scheme": "embarqueacessivel",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Permita que o Embarque Acessível use sua localização para acompanhar o embarque."
+        }
+      ]
+    ],
+    "android": {
+      "package": "br.edu.tcc.embarqueacessivel",
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]
+    }
+  }
 }
